@@ -47,7 +47,6 @@ function pm_existing_pages_ctools_export_ui_form(&$form, &$form_state) {
     '#id' => 'edit-label',
     '#type' => 'textfield',
     '#title' => t('Label'),
-    '#description' => t('The label of this task.'),
     '#default_value' => $form_state['item']->label,
   );
 
@@ -83,11 +82,17 @@ function pm_existing_pages_find_paths($search = '') {
   $matches = array();
 
   if (strlen($search) > 2) {
+    // Reconvert the '/'.
+    $search = str_replace(chr(27), '/', $search);
+
+    // Select max 10 paths.
     $records = db_select('menu_router', 'mr')
       ->fields('mr', array('path', 'title', 'page_callback', 'load_functions'))
       ->condition('page_callback', 'page_manager_page_execute', '!=')
       ->condition('page_callback', 'pm_existing_pages_pm_existing_pages_page', '!=')
-      ->condition('path', $search . '%', 'LIKE')
+      ->condition('path', '%' . $search . '%', 'LIKE')
+      ->extend('PagerDefault')
+      ->limit(10)
       ->execute();
 
     foreach ($records as $record) {

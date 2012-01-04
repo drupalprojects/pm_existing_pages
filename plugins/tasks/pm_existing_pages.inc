@@ -56,7 +56,7 @@ function pm_existing_pages_pm_existing_pages_menu_alter(&$items, $task) {
       }
 
       // Add more page arguments.
-      $pm_bonus_arguments = array(
+      $pm_args = array(
         'ti' => $task_id,
         'pc' => $items[$path]['page callback'],
         'f' => isset($items[$path]['file']) ? $items[$path]['file'] : '',
@@ -64,7 +64,7 @@ function pm_existing_pages_pm_existing_pages_menu_alter(&$items, $task) {
         'm' => isset($items[$path]['module']) ? $items[$path]['module'] : '',
       );
       $page_arguments = isset($items[$path]['page arguments']) ? $items[$path]['page arguments'] : array();
-      $page_arguments[] = $pm_bonus_arguments;
+      $page_arguments[] = $pm_args;
       $items[$path]['page callback'] = 'pm_existing_pages_pm_existing_pages_page';
       $items[$path]['page arguments'] = $page_arguments;
       $items[$path]['file path'] = $task['path'];
@@ -79,12 +79,12 @@ function pm_existing_pages_pm_existing_pages_menu_alter(&$items, $task) {
 function pm_existing_pages_pm_existing_pages_page() {
   $args = func_get_args();
 
-  $pm_bonus_args = array_pop($args);
-  $task_id = $pm_bonus_args['ti'];
-  $function = $pm_bonus_args['pc'];
-  $file = $pm_bonus_args['f'];
-  $file_path = $pm_bonus_args['fp'];
-  $module = $pm_bonus_args['m'];
+  $pm_args = array_pop($args);
+  $task_id = $pm_args['ti'];
+  $function = $pm_args['pc'];
+  $file = $pm_args['f'];
+  $file_path = $pm_args['fp'];
+  $module = $pm_args['m'];
 
   // Load task plugin.
   $task = page_manager_get_task('pm_existing_pages');

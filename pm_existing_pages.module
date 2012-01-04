@@ -79,7 +79,7 @@ function pm_existing_pages_ctools_plugin_directory($owner, $plugin_type) {
 }
 
 /**
- * Get one or all custom overridden tasks.
+ * Get one or all custom overridden pages.
  *
  * @param $task_id
  *   The name of the task.

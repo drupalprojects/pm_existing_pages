@@ -20,7 +20,7 @@ $plugin = array(
 );
 
 /**
- * Output function for the custom task page.
+ * Output function for the existing page.
  */
 function pm_existing_pages_pm_existing_pages_content_type_render($subtype, $conf, $panel_args) {
 
@@ -38,11 +38,11 @@ function pm_existing_pages_pm_existing_pages_content_type_render($subtype, $conf
     return;
   }
 
-  $pm_bonus_args = array_pop($args);
-  $function = $pm_bonus_args['pc'];
-  $file = $pm_bonus_args['f'];
-  $file_path = $pm_bonus_args['fp'];
-  $module = $pm_bonus_args['m'];
+  $pm_args = array_pop($args);
+  $function = $pm_args['pc'];
+  $file = $pm_args['f'];
+  $file_path = $pm_args['fp'];
+  $module = $pm_args['m'];
 
   if ($file) {
     if (empty($file_path) && !empty($module)) {
@@ -90,10 +90,11 @@ function pm_existing_pages_pm_existing_pages_content_type_edit_form_submit($form
 }
 
 /**
- * Returns the administrative title for the Apache Solr search page.
+ * Returns the administrative title for the existing page.
  */
 function pm_existing_pages_pm_existing_pages_content_type_admin_title($subtype, $conf) {
-  return t('Existing page');
+  $existing_page = pm_existing_pages_get_existing_pages($conf['task_id']);
+  return t('Existing page: @title', array('@title' => $existing_page->label));
 }
 
 /**
