@@ -28,6 +28,8 @@ function pm_existing_pages_pm_existing_pages_page_manager_tasks() {
     // This is task uses 'context' handlers and must implement these to give the
     // handler data it needs.
     'handler type' => 'context',
+    'get arguments' => 'pm_existing_pages_pm_existing_pages_get_arguments',
+    'get context placeholders' => 'pm_existing_pages_pm_existing_pages_get_contexts',
   );
 }
 
@@ -93,7 +95,9 @@ function pm_existing_pages_pm_existing_pages_page() {
   // Render through CTools.
   ctools_include('context');
   ctools_include('context-task-handler');
-  $output = ctools_context_handler_render($task, $subtask, array(), array());
+  $context_args = _pm_existing_pages_get_context_arguments($args, $pm_args, $task_id);
+  $contexts = ctools_context_handler_get_task_contexts($task, $subtask, array($context_args[0]));
+  $output = ctools_context_handler_render($task, $subtask, $contexts, array($context_args[1]));
   if ($output !== FALSE) {
     return $output;
   }
@@ -106,6 +110,20 @@ function pm_existing_pages_pm_existing_pages_page() {
     require_once DRUPAL_ROOT . '/' . $file_path . '/' . $file;
   }
   return call_user_func_array($function, $args);
+}
+
+/**
+ * Callback to get arguments provided by this task handler.
+ */
+function pm_existing_pages_pm_existing_pages_get_arguments($task, $subtask_id) {
+  return _pm_existing_pages_get_context($task, $subtask_id);
+}
+
+/**
+ * Callback to get context placeholders provided by this handler.
+ */
+function pm_existing_pages_pm_existing_pages_get_contexts($task, $subtask_id) {
+  return ctools_context_get_placeholders_from_argument(pm_existing_pages_pm_existing_pages_get_arguments($task, $subtask_id));
 }
 
 /**
@@ -162,4 +180,82 @@ function pm_existing_pages_pm_existing_pages_build_subtask($task, $task_id) {
   );
 
   return $subtask;
+}
+
+/**
+ * Get the context for task and subtask.
+ */
+function _pm_existing_pages_get_context($task, $subtask) {
+  $existing_page = pm_existing_pages_get_existing_pages($subtask['name']);
+  if (!$existing_page || empty($existing_page->context)) {
+    return array();
+  }
+
+  list($type, $info, $other) = explode('|', $existing_page->context);
+  switch ($type) {
+    case 'entity':
+      return array(
+        array(
+          'keyword' => $info,
+          'identifier' => t('@type being viewed', array('@type' => ucfirst(check_plain($info)))),
+          'id' => 1,
+          'name' => 'entity_id:' . $info,
+          'settings' => array(),
+        )
+      );
+      break;
+  }
+
+  // Nothing found.
+  return array();
+}
+
+/**
+ * Get the arguments for context - if possible.
+ *
+ * We probably need to look at _menu_load_objects() for more
+ * inspiration to get this completely right.
+ *
+ * @param $args
+ *   The arguments passed by the menu.
+ * @param $pm_args
+ *   The page manager arguments.
+ * @param $task_id
+ *   The name of
+ *
+ * @return $context_args
+ *   A collection of arguments we need for CTools.
+ */
+function _pm_existing_pages_get_context_arguments($menu_args, $pm_args, $task_id) {
+
+  // If no menu arguments, we can skip.
+  if (empty($menu_args)) {
+    return array(0 => '', 1 => '');
+  }
+
+  $existing_page = pm_existing_pages_get_existing_pages($task_id);
+  list($type, $info, $other) = explode('|', $existing_page->context);
+  switch ($type) {
+    case 'entity':
+      $position = 1;
+      $router_item = menu_get_item();
+      $lf = $router_item['load_functions'];
+      foreach ($lf as $pos => $function) {
+        if ($function == $info . '_load') {
+          $position = $pos;
+          break;
+        }
+      }
+      $object = menu_get_object($info, $position);
+      if ($object) {
+        return array(
+          0 => $object,
+          1 => $object->{$other},
+        );
+      }
+      break;
+  }
+
+  // Nothing found.
+  return array(0 => '', 1 => '');
 }

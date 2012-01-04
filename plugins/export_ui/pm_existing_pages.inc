@@ -50,6 +50,13 @@ function pm_existing_pages_ctools_export_ui_form(&$form, &$form_state) {
     '#default_value' => $form_state['item']->label,
   );
 
+  $form['context'] = array(
+    '#title' => t('Default context'),
+    '#type' => 'select',
+    '#options' => pm_existing_pages_get_context_options(),
+    '#default_value' => $form_state['item']->context,
+  );
+
   $form['paths'] = array(
     '#type' => 'textarea',
     '#title' => t('Paths'),
@@ -63,48 +70,8 @@ function pm_existing_pages_ctools_export_ui_form(&$form, &$form_state) {
     '#title' => t('Search paths'),
     '#description' => t('Start typing to find existing menu router items. Clicking on a path will add this to the "Paths" textarea above.'),
     '#autocomplete_path' => 'admin/structure/existing-pages/find',
-    '#size' => 120,
+    '#size' => 160,
   );
-}
-
-/**
- * Return whether a task machine name is unique.
- */
-function pm_existing_pages_task_unique($name) {
-  return pm_existing_pages_get_existing_pages($name);
-}
-
-/**
- * Menu callback to search for menu router items.
- */
-function pm_existing_pages_find_paths($search = '') {
-
-  $matches = array();
-
-  if (strlen($search) > 2) {
-    // Reconvert the '/'.
-    $search = str_replace(chr(27), '/', $search);
-
-    // Select max 10 paths.
-    $records = db_select('menu_router', 'mr')
-      ->fields('mr', array('path', 'title', 'page_callback', 'load_functions'))
-      ->condition('page_callback', 'page_manager_page_execute', '!=')
-      ->condition('page_callback', 'pm_existing_pages_pm_existing_pages_page', '!=')
-      ->condition('path', '%' . $search . '%', 'LIKE')
-      ->extend('PagerDefault')
-      ->limit(10)
-      ->execute();
-
-    foreach ($records as $record) {
-      $matches[$record->path] = '<div class="pm-path"><strong>'. t('Path') . '</strong>: ' . $record->path . '</div><div class="pm-callback"><strong>' . t('Page callback') . ':</strong> ' . $record->page_callback . '</div><div class="clearfix" />';
-    }
-  }
-
-  if (!empty($matches)) {
-    $matches['close_pm_existing_pages_suggestions'] = '<div>' . t('Close popup') . '</div>';
-  }
-
-  drupal_json_output($matches);
 }
 
 /**
@@ -130,3 +97,94 @@ function pm_existing_pages_ctools_export_ui_form_validate(&$form, &$form_state) 
  */
 function pm_existing_pages_ctools_export_ui_form_submit(&$form, &$form_state) {}
 
+/**
+ * Return whether a task machine name is unique.
+ */
+function pm_existing_pages_task_unique($name) {
+  return pm_existing_pages_get_existing_pages($name);
+}
+
+/**
+ * Menu callback to search for menu router items.
+ */
+function pm_existing_pages_find_paths($search = '') {
+
+  $matches = array();
+
+  if (strlen($search) > 2) {
+    // Reconvert the '/'.
+    $search = str_replace(chr(27), '/', $search);
+
+    // Select max 10 paths.
+    $records = db_select('menu_router', 'mr')
+      ->fields('mr', array('path', 'title', 'page_callback', 'load_functions'))
+      ->condition('page_callback', 'page_manager_page_execute', '!=')
+      ->condition('page_callback', 'pm_existing_pages_pm_existing_pages_page', '!=')
+      ->condition('path', $search . '%', 'LIKE')
+      ->extend('PagerDefault')
+      ->limit(10)
+      ->execute();
+
+    foreach ($records as $record) {
+      $path = $record->path;
+      $lf = unserialize($record->load_functions);
+      if (!empty($lf)) {
+        $path = pm_existing_pages_determine_path($lf, $path);
+      }
+      $matches[$path] = '<div class="pm-path"><strong>'. t('Path') . '</strong>: ' . $path . '</div><div class="pm-callback"><strong>' . t('Page callback') . ':</strong> ' . $record->page_callback . '</div><div class="clearfix" />';
+    }
+  }
+
+  if (!empty($matches)) {
+    $matches['close_pm_existing_pages_suggestions'] = '<div>' . t('Close popup') . '</div>';
+  }
+
+  drupal_json_output($matches);
+}
+
+/**
+ * Determine the path based on load functions. Change wildcareds
+ * eg node/% to node/%node so we know the exact path in menu alter.
+ *
+ * @param $lf
+ *   A collection of load functions.
+ * @param $path
+ *   The path
+ *
+ * @return $path
+ *   A path, where wildcards are potentially replaced.
+ */
+function pm_existing_pages_determine_path($lf, $path) {
+  $parts = explode('/', $path);
+  foreach ($lf as $position => $function) {
+    if ($parts[$position] == '%' && substr($function, -5) == '_load') {
+      $parts[$position] = $parts[$position] = '%' . str_replace('_load', '', $function);
+    }
+  }
+  $path = implode('/', $parts);
+  return $path;
+}
+
+/**
+ * Function to get known contexts for selection form.
+ */
+function pm_existing_pages_get_context_options() {
+  $options = array(
+    '' => t('No context'),
+  );
+
+  // Add entity contexts.
+  $ignore_entities = array('node', 'user', 'comment', 'taxonomy_term', 'taxonomy_vocabulary', 'rules_config');
+  $entity_info = entity_get_info();
+  foreach ($entity_info as $entity_type => $info) {
+    if (in_array($entity_type, $ignore_entities)) {
+      continue;
+    }
+    if (isset($info['fieldable']) && $info['fieldable']) {
+      $id = $info['entity keys']['id'];
+      $options['entity|' . $entity_type . '|' . $id] = $info['label'];
+    }
+  }
+
+  return $options;
+}
