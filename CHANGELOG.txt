@@ -2,6 +2,7 @@
 -------------------------------------------------------------------------------------
 7.x-1.1 xx/xx/2012
 -------------------------------------------------------------------------------------
+- #1394878 by swentel: fix notice when no task_id is available yet.
 - #1395016 by swentel: fix notice when context is empty.
 - #1394772 by dereine: Small improvement to README.
 

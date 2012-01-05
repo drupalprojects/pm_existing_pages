@@ -64,7 +64,7 @@ function pm_existing_pages_pm_existing_pages_content_type_render($subtype, $conf
  * Select the task/page.
  */
 function pm_existing_pages_pm_existing_pages_content_type_edit_form($form, &$form_state) {
-  $options = array();
+  $options = array('' => t('-- Select --'));
 
   $custom_tasks = pm_existing_pages_get_existing_pages();
   foreach ($custom_tasks as $task_id => $info) {
@@ -76,7 +76,7 @@ function pm_existing_pages_pm_existing_pages_content_type_edit_form($form, &$for
     '#title' => t('Existing page'),
     '#type' => 'select',
     '#options' => $options,
-    '#default_value' => $form_state['conf']['task_id'],
+    '#default_value' => isset($form_state['conf']['task_id']) ? $form_state['conf']['task_id'] : '',
   );
 
   return $form;
