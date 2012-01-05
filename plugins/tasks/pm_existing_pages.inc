@@ -234,26 +234,28 @@ function _pm_existing_pages_get_context_arguments($menu_args, $pm_args, $task_id
   }
 
   $existing_page = pm_existing_pages_get_existing_pages($task_id);
-  list($type, $info, $other) = explode('|', $existing_page->context);
-  switch ($type) {
-    case 'entity':
-      $position = 1;
-      $router_item = menu_get_item();
-      $lf = $router_item['load_functions'];
-      foreach ($lf as $pos => $function) {
-        if ($function == $info . '_load') {
-          $position = $pos;
-          break;
+  if (!empty($existing_page->context)) {
+    list($type, $info, $other) = explode('|', $existing_page->context);
+    switch ($type) {
+      case 'entity':
+        $position = 1;
+        $router_item = menu_get_item();
+        $lf = $router_item['load_functions'];
+        foreach ($lf as $pos => $function) {
+          if ($function == $info . '_load') {
+            $position = $pos;
+            break;
+          }
         }
-      }
-      $object = menu_get_object($info, $position);
-      if ($object) {
-        return array(
-          0 => $object,
-          1 => $object->{$other},
-        );
-      }
-      break;
+        $object = menu_get_object($info, $position);
+        if ($object) {
+          return array(
+            0 => $object,
+            1 => $object->{$other},
+          );
+        }
+        break;
+    }
   }
 
   // Nothing found.
