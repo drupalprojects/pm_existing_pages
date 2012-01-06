@@ -157,8 +157,15 @@ function pm_existing_pages_find_paths($search = '') {
 function pm_existing_pages_determine_path($lf, $path) {
   $parts = explode('/', $path);
   foreach ($lf as $position => $function) {
-    if ($parts[$position] == '%' && substr($function, -5) == '_load') {
-      $parts[$position] = $parts[$position] = '%' . str_replace('_load', '', $function);
+    if ($parts[$position] == '%') {
+      // Menu tail.
+      if (is_array($function) && key($function) == 'menu_tail_load') {
+        $parts[$position] = $parts[$position] = '%menu_tail';
+      }
+      // Normal load objects.
+      elseif (is_string($function) && substr($function, -5) == '_load') {
+        $parts[$position] = $parts[$position] = '%' . str_replace('_load', '', $function);
+      }
     }
   }
   $path = implode('/', $parts);
