@@ -173,7 +173,6 @@ function pm_existing_pages_pm_existing_pages_build_subtask($task, $task_id) {
     'admin path' => check_plain($main_path),
     'admin description' => check_plain($info->label),
     'admin type' => t('Existing'),
-    'row class' => empty($page->disabled) ? 'page-manager-enabled' : 'page-manager-disabled',
     'storage' => t('In code'),
     'disabled' => variable_get('pm_existing_pages_disabled_' . $task_id, TRUE),
     'enable callback' => 'pm_existing_pages_pm_existing_pages_enable',
