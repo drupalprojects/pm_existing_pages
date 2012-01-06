@@ -174,7 +174,7 @@ function pm_existing_pages_get_context_options() {
   );
 
   // Add entity contexts.
-  $ignore_entities = array('node', 'user', 'comment', 'taxonomy_term', 'taxonomy_vocabulary', 'rules_config');
+  $ignore_entities = array('rules_config');
   $entity_info = entity_get_info();
   foreach ($entity_info as $entity_type => $info) {
     if (in_array($entity_type, $ignore_entities)) {
