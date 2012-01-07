@@ -6,6 +6,14 @@ For a full description of the module, visit the project page:
   
 To submit bug reports and feature suggestions, or to track changes:
   http://drupal.org/project/issues/pm_existing_pages
+  
+-- INSTALLATION --
+
+Install the module as usual, more info can be found on
+http://drupal.org/documentation/install/modules-themes/modules-7
+You should also install Panels, which is not a dependency for this module
+but is the recommended module to start overriding page layouts.
+Panels can be found at http://drupal.org/project/panels
 
 -- USAGE --
 
