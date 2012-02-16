@@ -239,7 +239,7 @@ function _pm_existing_pages_get_context_arguments($menu_args, $pm_args, $task_id
       case 'entity':
         $position = 1;
         $router_item = menu_get_item();
-        $lf = $router_item['load_functions'];
+        $lf = is_array($router_item['load_functions']) ? $router_item['load_functions'] : array();
         foreach ($lf as $pos => $function) {
           if ($function == $info . '_load') {
             $position = $pos;
