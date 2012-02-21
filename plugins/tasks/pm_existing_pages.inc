@@ -57,6 +57,13 @@ function pm_existing_pages_pm_existing_pages_menu_alter(&$items, $task) {
         continue;
       }
 
+      // Make sure we have a page callback. We silently continue here, as this
+      // is a menu item that will inherit the page callback from its parent
+      // menu item.
+      if (empty($items[$path]['page callback'])) {
+        continue;
+      }
+
       // Add more page arguments.
       $pm_args = array(
         'ti' => $task_id,
