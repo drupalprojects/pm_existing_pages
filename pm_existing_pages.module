@@ -94,3 +94,30 @@ function pm_existing_pages_get_existing_pages($task_id = NULL) {
     return ctools_export_crud_load_all('page_manager_existing_pages');
   }
 }
+
+/**
+ * Implements hook_form_alter().
+ */
+function pm_existing_pages_form_alter(&$form, $form_state, $form_id) {
+
+  // Add validation on delete.
+  if ($form_id == 'ctools_export_ui_delete_confirm_form' && arg(3) == 'existing-pages') {
+    $existing_page = arg(5);
+    $form['existing_page'] = array(
+      '#type' => 'value',
+      '#value' => $existing_page
+    );
+    $form['#validate'][] = 'pm_existing_pages_delete_validate';
+  }
+}
+
+/**
+ * Validate callback: make sure no existing pages/variants exist for this page.
+ */
+function pm_existing_pages_delete_validate($form, $form_state) {
+  $existing_page = 'pm_existing_pages-' . $form_state['values']['existing_page'];
+  $page = page_manager_cache_load($existing_page);
+  if ($page && isset($page->handlers) && !empty($page->handlers)) {
+    form_set_error('', t('There is an existing variant for this page, please remove it first.'));
+  }
+}
