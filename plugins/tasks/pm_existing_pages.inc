@@ -68,14 +68,14 @@ function pm_existing_pages_pm_existing_pages_menu_alter(&$items, $task) {
       $pm_args = array(
         'ti' => $task_id,
         'pc' => $items[$path]['page callback'],
-        // Store default page arguments.
-        'pa' => isset($items[$path]['page arguments']) ? $items[$path]['page arguments'] : array(),
         'f' => isset($items[$path]['file']) ? $items[$path]['file'] : '',
         'fp' => isset($items[$path]['file path']) ? $items[$path]['file path'] : '',
         'm' => isset($items[$path]['module']) ? $items[$path]['module'] : '',
       );
+      $page_arguments = isset($items[$path]['page arguments']) ? $items[$path]['page arguments'] : array();
+      $page_arguments[] = $pm_args;
       $items[$path]['page callback'] = 'pm_existing_pages_pm_existing_pages_page';
-      $items[$path]['page arguments'] = array($pm_args);
+      $items[$path]['page arguments'] = $page_arguments;
       $items[$path]['file path'] = $task['path'];
       $items[$path]['file'] = $task['file'];
     }
@@ -88,11 +88,7 @@ function pm_existing_pages_pm_existing_pages_menu_alter(&$items, $task) {
 function pm_existing_pages_pm_existing_pages_page() {
   $args = func_get_args();
 
-  // Extract defaults from original menu router.
-  $pm_args = array_shift($args);
-  // Merge default page arguments with passed within request.
-  $args = array_merge($pm_args['pa'], $args);
-
+  $pm_args = array_pop($args);
   $task_id = $pm_args['ti'];
   $function = $pm_args['pc'];
   $file = $pm_args['f'];

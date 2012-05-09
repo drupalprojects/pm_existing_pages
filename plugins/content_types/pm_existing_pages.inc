@@ -38,11 +38,7 @@ function pm_existing_pages_pm_existing_pages_content_type_render($subtype, $conf
     return;
   }
 
-  // Extract defaults from original menu router.
-  $pm_args = array_shift($args);
-  // Merge default page arguments with passed within request.
-  $args = array_merge($pm_args['pa'], $args);
-
+  $pm_args = array_pop($args);
   $function = $pm_args['pc'];
   $file = $pm_args['f'];
   $file_path = $pm_args['fp'];
