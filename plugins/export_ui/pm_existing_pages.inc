@@ -160,14 +160,14 @@ function pm_existing_pages_determine_path($lf, $path) {
     if ($parts[$position] == '%') {
       // Menu tail.
       if (is_array($function) && key($function) == 'menu_tail_load') {
-        $parts[$position] = $parts[$position] = '%menu_tail';
+        $parts[$position] = '%menu_tail';
       }
       elseif (is_array($function) && key($function) == 'views_arg_load') {
-        $parts[$position] = $parts[$position] = '%views_arg';
+        $parts[$position] = '%views_arg';
       }
       // Normal load objects.
       elseif (is_string($function) && substr($function, -5) == '_load') {
-        $parts[$position] = $parts[$position] = '%' . str_replace('_load', '', $function);
+        $parts[$position] = '%' . str_replace('_load', '', $function);
       }
     }
   }
