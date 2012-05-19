@@ -121,7 +121,7 @@ function pm_existing_pages_pm_existing_pages_page() {
     }
     require_once DRUPAL_ROOT . '/' . $file_path . '/' . $file;
   }
-  return call_user_func_array($function, $args);
+  return call_user_func_array($function, $menu_args);
 }
 
 /**
