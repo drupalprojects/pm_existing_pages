@@ -107,7 +107,7 @@ function pm_existing_pages_pm_existing_pages_page() {
   // Render through CTools.
   ctools_include('context');
   ctools_include('context-task-handler');
-  $context_args = _pm_existing_pages_get_context_arguments($args, $pm_args, $task_id);
+  $context_args = _pm_existing_pages_get_context_arguments($menu_args, $pm_args, $task_id);
   $contexts = ctools_context_handler_get_task_contexts($task, $subtask, array($context_args[0]));
   $output = ctools_context_handler_render($task, $subtask, $contexts, array($context_args[1], $menu_args, $pm_args));
   if ($output !== FALSE) {
