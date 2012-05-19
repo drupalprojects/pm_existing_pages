@@ -88,7 +88,12 @@ function pm_existing_pages_pm_existing_pages_menu_alter(&$items, $task) {
 function pm_existing_pages_pm_existing_pages_page() {
   $args = func_get_args();
 
-  $pm_args = array_pop($args);
+  // Determine which are the menu and pmep arguments.
+  $split_args = _pm_existing_pages_get_pm_args($args);
+  $menu_args = $split_args['menu'];
+
+  // Get pmep arguments.
+  $pm_args = $split_args['pmep'];
   $task_id = $pm_args['ti'];
   $function = $pm_args['pc'];
   $file = $pm_args['f'];
@@ -104,7 +109,7 @@ function pm_existing_pages_pm_existing_pages_page() {
   ctools_include('context-task-handler');
   $context_args = _pm_existing_pages_get_context_arguments($args, $pm_args, $task_id);
   $contexts = ctools_context_handler_get_task_contexts($task, $subtask, array($context_args[0]));
-  $output = ctools_context_handler_render($task, $subtask, $contexts, array($context_args[1]));
+  $output = ctools_context_handler_render($task, $subtask, $contexts, array($context_args[1], $menu_args, $pm_args));
   if ($output !== FALSE) {
     return $output;
   }
@@ -266,4 +271,33 @@ function _pm_existing_pages_get_context_arguments($menu_args, $pm_args, $task_id
 
   // Nothing found.
   return array(0 => '', 1 => '');
+}
+
+/**
+ * Helper function to split menu arguments from pm arguments.
+ *
+ * We don't know if there will be any additional arguments
+ * send along through the URL which are not menu loader
+ * arguments or unknown in the menu router path. So
+ * depending on the path, the array we need for pmep
+ * can be the first or last.
+ *
+ * @param $args
+ *   A collection of arguments.
+ */
+function _pm_existing_pages_get_pm_args($args) {
+
+  $arguments = array('menu' => array(), 'pmep' => array());
+
+  foreach ($args as $key => $value) {
+    if (is_array($value) && isset($value['ti'])) {
+      // Supposing this pmep argument.
+      $arguments['pmep'] = $args[$key];
+    }
+    else {
+      $arguments['menu'][] = $value;
+    }
+  }
+
+  return $arguments;
 }

@@ -120,7 +120,7 @@ function pm_existing_pages_find_paths($search = '') {
       ->fields('mr', array('path', 'title', 'page_callback', 'load_functions'))
       ->condition('page_callback', 'page_manager_page_execute', '!=')
       ->condition('page_callback', 'pm_existing_pages_pm_existing_pages_page', '!=')
-      ->condition('path', $search . '%', 'LIKE')
+      ->condition('path', db_like($search) . '%', 'LIKE')
       ->extend('PagerDefault')
       ->limit(10)
       ->execute();
