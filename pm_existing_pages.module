@@ -157,3 +157,19 @@ function pm_existing_pages_delete_validate($form, $form_state) {
     form_set_error('', t('There is an existing variant for this page, please remove it first.'));
   }
 }
+
+/**
+ * Status callback.
+ */
+function pm_existing_pages_set_status($object, $status) {
+  // Set variable page.
+  variable_set('pm_existing_pages_disabled_' . $object->name, $status);
+
+  // Set object status. @see ctools_export_crud_set_status().
+  if (is_object($object)) {
+    ctools_export_set_object_status($object, $status);
+  }
+  else {
+    ctools_export_set_status($object->table, $object, $status);
+  }
+}
